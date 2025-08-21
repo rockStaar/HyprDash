@@ -1,21 +1,9 @@
-const disk = require("diskusage-ng");
+// Import the function from network.js
+const { getNetworkUsage } = require('./metrics/network');
 
-function checkDisk() {
-  disk("/", (err, info) => {
-    if (err) {
-      console.error("Error:", err);
-    } else {
-      console.clear(); // clears the terminal for live effect
-      console.log("📀 Disk Usage (refreshed every 2s)");
-      console.log("----------------------------");
-      console.log(`Available: ${(info.available / (1024 ** 3)).toFixed(2)} GB`);
-      console.log(`Free:      ${(info.free / (1024 ** 3)).toFixed(2)} GB`);
-      console.log(`Total:     ${(info.total / (1024 ** 3)).toFixed(2)} GB`);
-    }
-  });
-}
+// Call the function
+const networks = getNetworkUsage();
 
-// run every 2 seconds
-setInterval(checkDisk, 2000);
-
-checkDisk(); 
+// Print the result
+console.log("Network Interfaces:");
+console.log(networks);
