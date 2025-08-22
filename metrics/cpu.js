@@ -2,34 +2,24 @@
 
 const os = require('node:os');
 
-function getCpuUsage(){
+function getCpuUsage() {
+  const cpus = os.cpus();
 
-  const cpus = os.cpus(); // Returns an array of objects containing information about each logical CPU core
+  let user = 0, nice = 0, sys = 0, idle = 0, irq = 0;
 
-  //different cpu time types
- 
-  let user = 0; //indicates time spent in user-level processes (applications)  
-  let nice = 0;  // refers to user processes with adjusted (lower) priority
-  let sys = 0;  //is time spent in kernel space (OS tasks)
-  let idle = 0;  //is the time the CPU is not doing anything
-  let irq = 0;  // is time spent handling hardware interrupts
+  for (let cpu of cpus) {
+    user += cpu.times.user;
+    nice += cpu.times.nice;
+    sys  += cpu.times.sys;
+    idle += cpu.times.idle;
+    irq  += cpu.times.irq;
+  }
 
-  for (let cpu of cpus){
+  const total = user + nice + sys + idle + irq;
 
-    user += cpu.times.user;  // Add up time spent in user mode.
-    nice += cpu.times.nice;  // Add up time spent with low priority processes.
-    sys += cpu.times.sys;  // Add up time spent in system/kernel mode.
-    idle += cpu.times.idle;  // Add up idle (unused) CPU time.
-    irq += cpu.times.irq;  // Add up time handling hardware interrupts.
-
-    const total = user + nice + sys + idle + irq;  
-  // Calculate total CPU time.
-
-  return { idle, total };  
-  // Return only idle and total time snapshot.
-   }
-
+  return { idle, total };  // ✅ return after summing all cores
 }
+
 
 function calculateCpuPercent(start, end) {  
 // Define function to calculate CPU usage between 2 snapshots.
