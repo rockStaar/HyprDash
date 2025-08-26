@@ -14,7 +14,6 @@ function diskUsage(path = "/") {
       resolve({
 
         total: bytesToGB(total),     // Convert total disk size to GB
-        free: bytesToGB(free),       // Convert free space to GB
         available: bytesToGB(available) // Convert available space to GB
       
     });

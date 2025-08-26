@@ -1,29 +1,30 @@
-const express = require("express");    // import express
-const metrics = require("./metrics/index.js");    // import metrics functions
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const metricsSocket = require("./sockets/metricsSocket.js");
 
-const app = express();    // create express app
-const PORT = process.env.PORT || 5000;    // set port (default 5000)
-
-/*--------------ROUTES FOR METRICS---------------------*/
-
-app.get("/metrics", async (req, res) => {   //define GET endpoint at /metrics
-  try {
-    const data = {     // Create a data object containing system metrics
-      cpu: await metrics.cpuUsage(),   // Collect CPU usage asynchronously
-      disk: await metrics.diskUsage(),    // Collect disk usage asynchronously
-      memory: await metrics.checkMemory(),    // Collect memory usage asynchronously
-      network: await metrics.getNetworkUsage(),    // Collect network usage asynchronously
-    };
-    res.json(data);   //send the metrics data as JSON response
-  } catch (err) {
-    console.error("Error collecting metrics", err);    // Log any errors in metric collection
-    res.status(500).json({ error: "Failed to collect metrics" });    // Return error response if failed
-  }
+const app = express();
+const server = http.createServer(app); // Create HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: "*", // later restrict to frontend URL
+  },
 });
 
-// Start the Express server on defined port
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);    
+const PORT = process.env.PORT || 5000;
+
+// Basic test route
+app.get("/", (req, res) => {
+  res.send("HyprDash backend running!");
 });
 
-//log the server URL
+// Setup socket connections
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
+  metricsSocket(socket); // attach metrics logic for this client
+});
+
+// Start server
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

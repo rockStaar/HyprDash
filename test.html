@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HyprDash - Live Metrics</title>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1> Live System Metrics</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>CPU (%)</th>
+        <th>Disk (GB)</th>
+        <th>Memory (%)</th>
+        <th>Network</th>
+      </tr>
+    </thead>
+    <tbody id="metrics-body">
+      <!-- new rows will be added here -->
+    </tbody>
+  </table>
+
+  <script>
+    const socket = io("http://localhost:5000");
+
+    socket.on("connect", () => {
+      console.log("Connected to server!");
+    });
+
+    socket.on("metricsUpdate", (data) => {
+      const tbody = document.getElementById("metrics-body");
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${data.cpu} %</td>
+        <td>Total: ${data.disk.total} | Free: ${data.disk.free} | Avail: ${data.disk.available}</td>
+        <td>${data.memory.usedMemPercent}% (Used: ${data.memory.usedMem} / Total: ${data.memory.totalMem})</td>
+        <td>${data.network[0].iface} → ${data.network[0].address}</td>
+      `;
+
+      tbody.appendChild(row);
+
+      // auto-scroll to bottom so latest row is always visible
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+</body>
+</html>
