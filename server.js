@@ -1,12 +1,13 @@
+// server.js
 const express = require("express");
-const metrics = require("./metrics/index.js");
 const { register, updateMetrics } = require("./prometheus.js");
+const metrics = require("./metrics/index.js");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-/*--------------REST API ROUTE---------------------*/
-app.get("/metrics", async (req, res) => {
+// REST API endpoint (your JSON API)
+app.get("/metrics-json", async (req, res) => {
   try {
     const data = {
       cpu: await metrics.cpuUsage(),
@@ -21,14 +22,13 @@ app.get("/metrics", async (req, res) => {
   }
 });
 
-/*--------------PROMETHEUS ENDPOINT---------------------*/
-app.get("/metrics/prometheus", async (req, res) => {
-  await updateMetrics(); // update before serving
+// Prometheus endpoint
+app.get("/metrics", async (req, res) => {
+  await updateMetrics(); // update gauges
   res.set("Content-Type", register.contentType);
   res.end(await register.metrics());
 });
 
-/*--------------START SERVER---------------------*/
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
